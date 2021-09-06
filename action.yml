@@ -58,11 +58,13 @@ runs:
       uses: aws-actions/amazon-ecr-login@v1
     - name: Login to CodeArtifact
       id: code-artifact
+      shell: bash
       run: |
         aws codeartifact login --tool pip --repository ${{ inputs.codeartifact-repository }} --domain ${{ inputs.codeartifact-domain }} --domain-owner ${{ inputs.codeartifact-domain-owner }}
         echo ::set-output name=pip-index::$(pip config get global.index-url)
     - name: Setup docker context for buildx
       run: docker context ls | grep builders || docker context create builders
+      shell: bash
     - name: Setup Docker buildx
       id: buildx
       uses: docker/setup-buildx-action@v1
@@ -74,7 +76,7 @@ runs:
         path: /tmp/.buildx-cache
         key: ${{ runner.os }}-buildx-${{ github.sha }}
         restore-keys: |
-          ${{ runner-os }}-buildx-
+          ${{ runner.os }}-buildx-
     - name: Build and push docker image
       uses: docker/build-push-action@v2
       with:
@@ -93,3 +95,4 @@ runs:
       run: |
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      shell: bash
