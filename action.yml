@@ -10,35 +10,41 @@ inputs:
   push:
     description: 'Should docker image be pushed'
     required: false
-    default: true
+    default: 'true'
   index-url-secret-id:
     description: 'Docker secret name for pypi index URL'
     required: false
     default: pip-index
   aws-access-key-id:
-    description: ''
+    description: 'AWS Access Key ID'
     required: true
   aws-secret-access-key:
-    description: ''
+    description: 'AWS Secret Access Key'
     required: true
   aws-region:
-    description: ''
+    description: 'AWS region'
     required: true
   dockerhub-username:
-    description: ''
+    description: 'Dockerhub username'
     required: true
   dockerhub-password:
-    description: ''
+    description: 'Dockerhub password'
     required: true
   codeartifact-repository:
-    description: ''
+    description: 'AWS CodeArtifact repository to use'
     required: true
   codeartifact-domain:
-    description: ''
+    description: 'AWS CodeArtifact domain to use'
     required: true
   codeartifact-domain-owner:
-    description: ''
+    description: 'AWS CodeArtifact domain owner'
     required: true
+
+outputs:
+  built-docker-image:
+    description: 'Docker image that was built. If push is false, this is not usable value'
+    value: ${{ steps.aws-ecr.outputs.registry}}/${{ inputs.name }}:${{ inputs.version }}
+
 runs:
   using: 'composite'
   steps:
@@ -85,7 +91,7 @@ runs:
         context: .
         secrets: |
           ${{ inputs.index-url-secret-id }}=${{ steps.code-artifact.outputs.pip-index }}
-        tags: ${{ steps.aws-ecr.outputs.registry}}/${{ inputs.name}}:${{ inputs.version}}
+        tags: ${{ steps.aws-ecr.outputs.registry}}/${{ inputs.name }}:${{ inputs.version }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new
     # Temp fix
